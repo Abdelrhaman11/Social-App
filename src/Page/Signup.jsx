@@ -30,14 +30,6 @@ const navigate = useNavigate()
 
   const { handleSubmit, register , formState:{errors} } = useForm({
     resolver:zodResolver(signUpSchema),
-    defaultValues:{
-      name:"abdo",
-      email:"abdo@gmail.com",
-      password:"123asd123ASD@",
-      rePassword:"123asd123ASD@",
-      dateOfBirth:"2001-07-12",
-      gender:"male"
-    }
   })
 
 

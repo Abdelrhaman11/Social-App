@@ -28,11 +28,6 @@ export default function SignIn() {
 
   const {handleSubmit , register , formState:{errors}} = useForm({
     resolver:zodResolver(loginSchema),
-    defaultValues:{
-      email:"abdo123@gmail.com",
-      password:"123asd123ASD@",
-
-    }
   })
 
 
