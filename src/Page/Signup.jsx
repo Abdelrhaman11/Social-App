@@ -30,6 +30,7 @@ const navigate = useNavigate()
 
   const { handleSubmit, register , formState:{errors} } = useForm({
     resolver:zodResolver(signUpSchema),
+    
   })
 
 
@@ -282,6 +283,23 @@ function getInputProps(label,type,field) {
               isVisible ? "text" : "password",
               errors.rePassword
             )}
+
+            endContent={
+              <button
+                aria-label="toggle password visibility"
+                className="focus:outline-none"
+                type="button"
+                onClick={toggleVisibility}
+              >
+                {
+                  isVisible ? (
+                    <EyeSlashFilledIcon className="text-2xl text-default-400" />
+                  ) : (
+                    <EyeFilledIcon className="text-2xl text-default-400" />
+                  )
+                }
+              </button>
+            }
 
             classNames={{
               inputWrapper:
