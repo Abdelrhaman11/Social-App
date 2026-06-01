@@ -25,10 +25,8 @@ export default function Post({post , comments , getPosts}) {
     const [topCommentContent , setTopCommentContent] = useState(post.topComment? post.topComment.content : false)
     const [commentContent , setCommentContent] = useState("")
 
-    const [likes, setLikes] = useState(post.topComment?.likes.length)
-    const [isLiked, setIsLiked] = useState(post.topComment?.likes.includes(userData._id))
 
-    const [likesUsers, setLikesUsers] = useState([])
+    const [topLikesUsers, setTopLikesUsers] = useState([])
     const [openModal, setOpenModal] = useState(null)
     
 
@@ -95,25 +93,25 @@ export default function Post({post , comments , getPosts}) {
   }
 
 
-     async function handleLike() {
-    const newLikedState = !isLiked
-          setIsLiked(newLikedState)
-  
-      setLikes(prev => newLikedState ? prev + 1 : prev - 1)
+     async function handleLike(commentId = null) {
+    
   
       try {
   
-          await apiServices.likeComment(post._id, post.topComment?._id)
+          await apiServices.likeComment(post._id, commentId || post.topComment?._id )
+          getPosts()
   
   
       } catch (error) {
+
+            console.log(error)
         
-        setIsLiked(!newLikedState)
-        setLikes(likeCount)
+
       }
     }
 
-      async function getLikesUsers() {
+
+      async function getTopLikesUsers() {
     
         try{
               const users = []
@@ -126,7 +124,7 @@ export default function Post({post , comments , getPosts}) {
     
         }
        
-          setLikesUsers(users)
+          setTopLikesUsers(users)
           setOpenModal("likes")
     
         }catch(error){
@@ -134,8 +132,32 @@ export default function Post({post , comments , getPosts}) {
         }
     
       }
-    
 
+      async function getCommentLikesUsers(commentId){
+
+        try{
+              const users = []
+    
+        for (const comment of comments) {
+        for (const userId of comment.likes) {
+    
+          const data = await apiServices.getUserProfile(userId)
+    
+          users.push(data.data.user)
+    
+        }
+        }
+       
+          setTopLikesUsers(users)
+          setOpenModal("likes")
+    
+        }catch(error){
+              console.log(error)
+        }
+    
+      }
+
+ 
 
 
 
@@ -212,15 +234,15 @@ export default function Post({post , comments , getPosts}) {
                             {comment.image && <img src={comment.image} className='w-1/2 mt-2' alt="Comment image" />}
 
                             <div className="mt-2 flex items-center">
-                              <a className="inline-flex items-center py-2 mr-3" href="#">
-                                <span className="mr-2">
-                                  <svg className="fill-gray-400 dark:fill-rose-400" style={{width: 22, height: 22}} viewBox="0 0 24 24">
+                              <span className="inline-flex items-center py-2 mr-3" >
+                                <button onClick={() => handleLike(comment._id)} className="mr-2">
+                                  <svg className={comment.likes.includes(userData._id)? "fill-rose-600 dark:fill-rose-400":"fill-gray-400 dark:fill-gray-300"} style={{width: 22, height: 22}} viewBox="0 0 24 24">
                                     <path d="M12,21.35L10.55,20.03C5.4,15.36 2,12.27 2,8.5C2,5.41 4.42,3 7.5,3C9.24,3 10.91,3.81 12,5.08C13.09,3.81 14.76,3 16.5,3C19.58,3 22,5.41 22,8.5C22,12.27 18.6,15.36 13.45,20.03L12,21.35Z">
                                     </path>
                                   </svg>
-                                </span>
-                                <span className="text-base font-bold">{comment.likes.length}</span>
-                              </a>
+                                </button>
+                                <button onClick={()=>getCommentLikesUsers(comment._id)} className="text-base font-bold">{comment.likes.length}</button>
+                              </span>
                               <button className="py-2 px-4 font-medium hover:bg-slate-50 dark:hover:bg-slate-700 rounded-lg">
                                 Repply
                               </button>
@@ -291,13 +313,13 @@ export default function Post({post , comments , getPosts}) {
                   
         <div className="mt-2 flex items-center">
           <span className="inline-flex items-center py-2 mr-3" >
-            <button onClick={handleLike} className="mr-2">
-              <svg className={isLiked ? "fill-rose-600 dark:fill-rose-400" : "fill-gray-400 dark:fill-gray-300"} style={{width: 22, height: 22}} viewBox="0 0 24 24">
+            <button onClick={() => handleLike()} className="mr-2">
+              <svg className={post.topComment?.likes.includes(userData._id) ? "fill-rose-600 dark:fill-rose-400" : "fill-gray-400 dark:fill-gray-300"} style={{width: 22, height: 22}} viewBox="0 0 24 24">
                 <path d="M12,21.35L10.55,20.03C5.4,15.36 2,12.27 2,8.5C2,5.41 4.42,3 7.5,3C9.24,3 10.91,3.81 12,5.08C13.09,3.81 14.76,3 16.5,3C19.58,3 22,5.41 22,8.5C22,12.27 18.6,15.36 13.45,20.03L12,21.35Z">
                 </path>
               </svg>
             </button>
-            <button onClick={getLikesUsers} className="text-base font-bold">{likes}</button>
+            <button onClick={getTopLikesUsers} className="text-base font-bold">{post.topComment?.likes.length}</button>
           </span>
           <button className="py-2 px-4 font-medium hover:bg-slate-50 dark:hover:bg-slate-700 rounded-lg">
             Repply
@@ -357,7 +379,7 @@ export default function Post({post , comments , getPosts}) {
         <div className="space-y-3 max-h-[300px] overflow-y-auto">
 
           {
-            likesUsers.map((user) => (
+            topLikesUsers.map((user) => (
 
               <Link to={`/users/${user._id}/profile`}
                 key={user._id}

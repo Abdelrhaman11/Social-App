@@ -30,7 +30,7 @@ class ApiServices {
               params:{
                 only:"following",
                 page,
-                limit:5
+                limit:3
               }
             })
             return data
@@ -45,15 +45,15 @@ class ApiServices {
             return data
 
     }
-    async getCommentsPost(postId){
+    async getCommentsPost(postId , page){
          const {data} =await axios.get(import.meta.env.VITE_BASE_URL +  "/posts/" + postId + "/comments",{
                   headers:{
                     token:this.#token
                   },
                   params:{
-                    page:1,
+                    page,
                     // sort:"-createdAt",
-                    // limit:2,
+                    limit:3,
                   }
                 })
         
@@ -196,6 +196,17 @@ class ApiServices {
     })
     return data
   }
+
+  async createReply(postId,commentId,formData){
+    const {data} = await axios.post(import.meta.env.VITE_BASE_URL +  "/posts/" + postId + "/comments/" + commentId + "/replies",formData,{
+        headers:{
+            token:this.#token,
+                }})
+                return data
+
+  }
+
+
 
 
 
